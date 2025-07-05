@@ -272,11 +272,29 @@ class YouTubeNotesApp(QWidget):
         )
     def save_playlist_to_db(self):
         url = self.url_input.text().strip()
+        if not url:
+            QMessageBox.warning(self, "Error", "Please enter a playlist URL")
+            return
+
         try:
-            c.execute("INSERT INTO playlists (playlist_url) VALUES (?)", (url,))
-            self.current_playlist_id = c.lastrowid
+            # Create playlist folder using URL as fallback name
+            playlist_name = f"Playlist_{self.current_playlist_id}" if self.current_playlist_id else "Unnamed_Playlist"
+            safe_playlist_name = re.sub(r'[\\/*?:"<>|]', "", playlist_name)
+            playlist_folder = os.path.join("notes", safe_playlist_name)
+            os.makedirs(playlist_folder, exist_ok=True)
+
+            # Save to database (if not already exists)
+            c.execute("INSERT OR IGNORE INTO playlists (playlist_url) VALUES (?)", (url,))
+            if not self.current_playlist_id:
+                self.current_playlist_id = c.lastrowid
 
             for position, (youtube_id, video_url, title) in enumerate(self.video_data, start=1):
+                # Create video subfolder using known title
+                safe_title = re.sub(r'[\\/*?:"<>|]', "", title) if title else f"Video_{position}"
+                video_folder = os.path.join(playlist_folder, safe_title)
+                os.makedirs(video_folder, exist_ok=True)
+
+                # Store in database
                 c.execute("""
                     INSERT OR IGNORE INTO videos (youtube_id, video_url, title) 
                     VALUES (?, ?, ?)
@@ -286,19 +304,67 @@ class YouTubeNotesApp(QWidget):
                 video_id = c.fetchone()[0]
 
                 c.execute("""
-                    INSERT INTO playlist_videos (playlist_id, video_id, position) 
-                    VALUES (?, ?, ?)
-                """, (self.current_playlist_id, video_id, position))
+                    INSERT OR REPLACE INTO playlist_videos 
+                    (playlist_id, video_id, position, last_position_seconds) 
+                    VALUES (?, ?, ?, COALESCE(
+                        (SELECT last_position_seconds FROM playlist_videos 
+                        WHERE playlist_id = ? AND video_id = ?), 0))
+                """, (self.current_playlist_id, video_id, position, 
+                    self.current_playlist_id, video_id))
 
             conn.commit()
             self.add_playlist_btn.setEnabled(False)
             self.timestamp_btn.setEnabled(True)
             self.save_btn.setEnabled(True)
-            QMessageBox.information(self, "Success", "Playlist saved to database")
+            QMessageBox.information(self, "Success", "Playlist structure created successfully")
 
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to save playlist:\n{str(e)}")
 
+    def save_note(self):
+        if not all([self.current_video_id, self.current_playlist_id]):
+            QMessageBox.warning(self, "Error", "No video selected")
+            return
+
+        note = self.notes.toPlainText().strip()
+        if not note:
+            QMessageBox.warning(self, "Empty Note", "Cannot save empty note")
+            return
+
+        try:
+            # Get info from database
+            c.execute("""
+                SELECT p.playlist_url, v.title 
+                FROM playlists p
+                JOIN videos v ON v.youtube_id = ?
+                WHERE p.id = ?
+            """, (self.current_video_id, self.current_playlist_id))
+            result = c.fetchone()
+            
+            playlist_url, video_title = result if result else (None, None)
+
+            # Create folder names
+            playlist_name = f"Playlist_{self.current_playlist_id}" if not playlist_url else "Unnamed_Playlist"
+            video_name = video_title if video_title else f"Video_{self.current_video_id}"
+            
+            safe_playlist = re.sub(r'[\\/*?:"<>|]', "", playlist_name)
+            safe_video = re.sub(r'[\\/*?:"<>|]', "", video_name)
+            
+            note_folder = os.path.join("notes", safe_playlist, safe_video)
+            os.makedirs(note_folder, exist_ok=True)
+
+            # Save with timestamp
+            from datetime import datetime
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = os.path.join(note_folder, f"note_{timestamp}.txt")
+            
+            with open(filename, "w", encoding="utf-8") as f:
+                f.write(note)
+
+            QMessageBox.information(self, "Saved", f"Note saved to:\n{filename}")
+
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to save note:\n{e}")
     def play_selected_video(self, item):
         new_title = item.text()
         new_video_id, new_video_url = None, None
@@ -406,26 +472,6 @@ class YouTubeNotesApp(QWidget):
 
         self.video_player.page().runJavaScript(js, callback)
 
-    def save_note(self):
-        note = self.notes.toPlainText().strip()
-        if not note:
-            QMessageBox.warning(self, "Empty Note", "Cannot save empty note.")
-            return
-
-        safe_title = re.sub(r'[\\/*?:"<>|]', "", self.current_video_title)
-        default_name = f"notes/{safe_title}.txt"
-
-        filename, _ = QFileDialog.getSaveFileName(
-            self, "Save Note", default_name, "Text Files (*.txt)"
-        )
-
-        if filename:
-            try:
-                with open(filename, "w", encoding="utf-8") as f:
-                    f.write(note)
-                QMessageBox.information(self, "Saved", f"Note saved to:\n{filename}")
-            except Exception as e:
-                QMessageBox.critical(self, "Error", f"Failed to save note:\n{e}")
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

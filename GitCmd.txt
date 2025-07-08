@@ -1,0 +1,6 @@
+cd path/to/your/repository
+git status
+git add .
+git diff --cached  # Optional
+git commit -m "Your commit message"
+git push origin <branch-name>  # Optional

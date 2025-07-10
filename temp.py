@@ -29,97 +29,172 @@ c = conn.cursor()
 
 
 # Create tables if not exist
-c.execute('''
-CREATE TABLE IF NOT EXISTS playlists (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    playlist_url TEXT UNIQUE
-)
-''')
+# c.execute('''
+# CREATE TABLE IF NOT EXISTS playlists (
+#     id INTEGER PRIMARY KEY AUTOINCREMENT,
+#     playlist_url TEXT UNIQUE
+# )
+# ''')
 
-c.execute('''
-CREATE TABLE IF NOT EXISTS videos (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    youtube_id TEXT UNIQUE,
-    video_url TEXT,
-    title TEXT
-)
-''')
+# c.execute('''
+# CREATE TABLE IF NOT EXISTS videos (
+#     id INTEGER PRIMARY KEY AUTOINCREMENT,
+#     youtube_id TEXT UNIQUE,
+#     video_url TEXT,
+#     title TEXT
+# )
+# ''')
 
-c.execute('''
-CREATE TABLE IF NOT EXISTS playlist_videos (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    playlist_id INTEGER,
-    video_id INTEGER,
-    position INTEGER,
-    last_position_seconds INTEGER DEFAULT 0,
-    FOREIGN KEY (playlist_id) REFERENCES playlists(id),
-    FOREIGN KEY (video_id) REFERENCES videos(id),
-    UNIQUE (playlist_id, video_id)
-)
-''')
+# c.execute('''
+# CREATE TABLE IF NOT EXISTS playlist_videos (
+#     id INTEGER PRIMARY KEY AUTOINCREMENT,
+#     playlist_id INTEGER,
+#     video_id INTEGER,
+#     position INTEGER,
+#     last_position_seconds INTEGER DEFAULT 0,
+#     FOREIGN KEY (playlist_id) REFERENCES playlists(id),
+#     FOREIGN KEY (video_id) REFERENCES videos(id),
+#     UNIQUE (playlist_id, video_id)
+# )
+# ''')
 
-c.execute('''
-CREATE TABLE IF NOT EXISTS history (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    url TEXT UNIQUE,
-    accessed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)
-''')
+# c.execute('''
+# CREATE TABLE IF NOT EXISTS history (
+#     id INTEGER PRIMARY KEY AUTOINCREMENT,
+#     url TEXT UNIQUE,
+#     accessed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+# )
+# ''')
 
-c.execute('''
-CREATE TABLE IF NOT EXISTS video_timestamps (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    playlist_id INTEGER,
-    video_id INTEGER,
-    timestamp_seconds INTEGER,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (playlist_id) REFERENCES playlists(id),
-    FOREIGN KEY (video_id) REFERENCES videos(id)
-)
-''')
+# c.execute('''
+# CREATE TABLE IF NOT EXISTS video_timestamps (
+#     id INTEGER PRIMARY KEY AUTOINCREMENT,
+#     playlist_id INTEGER,
+#     video_id INTEGER,
+#     timestamp_seconds INTEGER,
+#     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+#     FOREIGN KEY (playlist_id) REFERENCES playlists(id),
+#     FOREIGN KEY (video_id) REFERENCES videos(id)
+# )
+# ''')
 
 
-c.execute('''
-CREATE TABLE IF NOT EXISTS VideoKeys (
-    id TEXT PRIMARY KEY,
-    video_id INTEGER,
-    playlist_id INTEGER,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (video_id, playlist_id),
-    FOREIGN KEY (video_id) REFERENCES videos(id),
-    FOREIGN KEY (playlist_id) REFERENCES playlists(id)
-)
-''')
+# c.execute('''
+# CREATE TABLE IF NOT EXISTS VideoKeys (
+#     id TEXT PRIMARY KEY,
+#     video_id INTEGER,
+#     playlist_id INTEGER,
+#     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+#     UNIQUE (video_id, playlist_id),
+#     FOREIGN KEY (video_id) REFERENCES videos(id),
+#     FOREIGN KEY (playlist_id) REFERENCES playlists(id)
+# )
+# ''')
 
-# 2. Advanced Note Table with formatting + media + timestamp
-c.execute('''
-CREATE TABLE IF NOT EXISTS Complete_Notes (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    key_id TEXT,
-    timestamp_seconds INTEGER,
-    content_html TEXT,
-    formatting_json TEXT,
-    resource_paths TEXT,
-    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (key_id) REFERENCES VideoKeys(id),
-    UNIQUE (key_id, timestamp_seconds)
-)
-''')
+# # 2. Advanced Note Table with formatting + media + timestamp
+# c.execute('''
+# CREATE TABLE IF NOT EXISTS Complete_Notes (
+#     id INTEGER PRIMARY KEY AUTOINCREMENT,
+#     key_id TEXT,
+#     timestamp_seconds INTEGER,
+#     content_html TEXT,
+#     formatting_json TEXT,
+#     resource_paths TEXT,
+#     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+#     FOREIGN KEY (key_id) REFERENCES VideoKeys(id),
+#     UNIQUE (key_id, timestamp_seconds)
+# )
+# ''')
 
-# 3. Last Watched Position Table
-c.execute('''
-CREATE TABLE IF NOT EXISTS LastPlayback (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    key_id TEXT,
-    last_position_seconds INTEGER,
-    last_position_str TEXT,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (key_id) REFERENCES VideoKeys(id),
-    UNIQUE (key_id)
-)
-''')
+# # 3. Last Watched Position Table
+# c.execute('''
+# CREATE TABLE IF NOT EXISTS LastPlayback (
+#     id INTEGER PRIMARY KEY AUTOINCREMENT,
+#     key_id TEXT,
+#     last_position_seconds INTEGER,
+#     last_position_str TEXT,
+#     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+#     FOREIGN KEY (key_id) REFERENCES VideoKeys(id),
+#     UNIQUE (key_id)
+# )
+# ''')
 
-conn.commit()
+# conn.commit()
+
+# Add this right after your other table creations
+def initialize_database():
+    tables = [
+        '''CREATE TABLE IF NOT EXISTS playlists (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            playlist_url TEXT UNIQUE
+        )''',
+        '''CREATE TABLE IF NOT EXISTS videos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            youtube_id TEXT UNIQUE,
+            video_url TEXT,
+            title TEXT
+        )''',
+        '''CREATE TABLE IF NOT EXISTS playlist_videos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            playlist_id INTEGER,
+            video_id INTEGER,
+            position INTEGER,
+            last_position_seconds INTEGER DEFAULT 0,
+            FOREIGN KEY (playlist_id) REFERENCES playlists(id),
+            FOREIGN KEY (video_id) REFERENCES videos(id),
+            UNIQUE (playlist_id, video_id)
+        )''',
+        '''CREATE TABLE IF NOT EXISTS history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            url TEXT UNIQUE,
+            accessed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )''',
+        '''CREATE TABLE IF NOT EXISTS video_timestamps (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            playlist_id INTEGER,
+            video_id INTEGER,
+            timestamp_seconds INTEGER,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (playlist_id) REFERENCES playlists(id),
+            FOREIGN KEY (video_id) REFERENCES videos(id)
+        )''',
+        '''CREATE TABLE IF NOT EXISTS VideoKeys (
+            id TEXT PRIMARY KEY,
+            video_id INTEGER,
+            playlist_id INTEGER,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE (video_id, playlist_id),
+            FOREIGN KEY (video_id) REFERENCES videos(id),
+            FOREIGN KEY (playlist_id) REFERENCES playlists(id)
+        )''',
+        '''CREATE TABLE IF NOT EXISTS Complete_Notes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            key_id TEXT,
+            timestamp_seconds INTEGER,
+            content_html TEXT,
+            formatting_json TEXT,
+            resource_paths TEXT,
+            last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (key_id) REFERENCES VideoKeys(id),
+            UNIQUE (key_id, timestamp_seconds)
+        )''',
+        '''CREATE TABLE IF NOT EXISTS LastPlayback (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            key_id TEXT,
+            last_position_seconds INTEGER,
+            last_position_str TEXT,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (key_id) REFERENCES VideoKeys(id),
+            UNIQUE (key_id)
+        )'''
+    ]
+    
+    for table in tables:
+        c.execute(table)
+    conn.commit()
+
+# Call this function before creating the application
+initialize_database()
 
 
 def get_or_create_key_id(video_id, playlist_id):
@@ -141,6 +216,7 @@ def get_or_create_key_id(video_id, playlist_id):
     except Exception as e:
         print(f"❌ [get_or_create_key_id] Error: {e}")
         return None
+
 
 
 class YouTubeNotesApp(QWidget):
@@ -380,7 +456,7 @@ class YouTubeNotesApp(QWidget):
 
         self.save_btn.setVisible(True)
         self.save_btn.setEnabled(False)
-
+        self.add_playlist_btn.clicked.connect(self.save_playlist_to_db)
 
         self.setup_shortcuts()
 
@@ -447,6 +523,10 @@ class YouTubeNotesApp(QWidget):
             QMessageBox.warning(self, "Error", "Please enter a YouTube video or playlist URL")
             return
 
+            # Reset button state
+        self.add_playlist_btn.setEnabled(True)
+        self.add_playlist_btn.setText("➕ Add Playlist to DB")
+
         # ✅ Option 3: Disable UI
         self.setEnabled(False)
         try:
@@ -493,7 +573,13 @@ class YouTubeNotesApp(QWidget):
                     layout.setContentsMargins(5, 5, 5, 5)
 
                     open_btn = QPushButton("Play ▶")
-                    open_btn.clicked.connect(lambda _, vid_url=video_url: self.play_video_by_url(vid_url))
+                    print("checking")
+                    # open_btn.clicked.connect(lambda _, vid_url=video_url: self.play_video_by_url(vid_url))
+                    # open_btn.clicked.connect(lambda _, title=title: self.simulate_video_click(title))
+
+                    open_btn.clicked.connect(lambda _, yid=youtube_id, vurl=video_url, t=title: self.play_video_from_data(yid, vurl, t))
+
+
                     layout.addWidget(open_btn)
 
                      # 🔁 Loop button (toggles loop for current video)
@@ -641,134 +727,108 @@ class YouTubeNotesApp(QWidget):
 
     def save_playlist_to_db(self):
         url = self.url_input.text().strip()
+        if not url:
+            return
+
         try:
-            c.execute("INSERT INTO playlists (playlist_url) VALUES (?)", (url,))
+            # First check if playlist exists
+            c.execute("SELECT id FROM playlists WHERE playlist_url = ?", (url,))
+            result = c.fetchone()
+            
+            if result:  # Playlist already exists
+                self.current_playlist_id = result[0]
+                self.add_playlist_btn.setEnabled(False)
+                self.add_playlist_btn.setText("📁 Playlist Already Added")
+                return
+
+            # Insert new playlist
+            c.execute("INSERT OR IGNORE INTO playlists (playlist_url) VALUES (?)", (url,))
             self.current_playlist_id = c.lastrowid
 
             for position, (youtube_id, video_url, title) in enumerate(self.video_data, start=1):
+                # Insert or ignore video
                 c.execute("""
                     INSERT OR IGNORE INTO videos (youtube_id, video_url, title) 
                     VALUES (?, ?, ?)
                 """, (youtube_id, video_url, title))
 
+                # Get video ID
                 c.execute("SELECT id FROM videos WHERE youtube_id = ?", (youtube_id,))
                 video_id = c.fetchone()[0]
 
+                # Insert playlist-video relationship with OR IGNORE
                 c.execute("""
-                    INSERT INTO playlist_videos (playlist_id, video_id, position) 
+                    INSERT OR IGNORE INTO playlist_videos (playlist_id, video_id, position) 
                     VALUES (?, ?, ?)
                 """, (self.current_playlist_id, video_id, position))
 
             conn.commit()
             self.add_playlist_btn.setEnabled(False)
-            self.timestamp_btn.setEnabled(True)
-            self.save_btn.setEnabled(True)
-            self.view_timestamps_btn.setEnabled(True)
-            QMessageBox.information(self, "Success", "Playlist saved to database","Button are enabled")
+            self.add_playlist_btn.setText("📁 Playlist Already Added")
+            QMessageBox.information(self, "Success", "Playlist saved to database")
 
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to save playlist:\n{str(e)}")
-
+    
     def play_selected_video(self, item):
-        new_title = item.text()
-        print(f"🎬 Switching to video: {new_title}")
-        new_video_id, new_video_url = None, None
+        # Get the widget containing the video info
+        widget = self.video_list.itemWidget(item)
+        if not widget:
+            return
 
-        # Match video from self.video_data
-        for youtube_id, video_url, title in self.video_data:
-            if title == new_title:
+        # Find the title label in the widget
+        title_label = widget.findChild(QLabel)
+        if not title_label:
+            return
+
+        title = title_label.text().strip()
+        print(f"🎬 Switching to video: {title}")
+
+        # Find the video in our data
+        new_video_id = None
+        new_video_url = None
+        for youtube_id, video_url, video_title in self.video_data:
+            if video_title.strip() == title:
                 new_video_id = youtube_id
                 new_video_url = video_url
                 break
-            print(f"📺 Matched video ID: {new_video_id}")
-        # ✅ Save current timestamp before switching
+
+        if not new_video_id or not new_video_url:
+            print("❌ [play_selected_video] Could not resolve video info")
+            return
+
+        # Save timestamp of previous video
         if self.current_video_id and self.current_video_id != new_video_id:
-            print("🔃 [play_selected_video] Switching video, saving current timestamp...")  # DEBUG
+            print("🔃 [play_selected_video] Switching video, saving current timestamp...")
             self.save_current_video_timestamp()
 
-        # ✅ Set current context
-        self.current_video_title = new_title
+        # Update current video info
+        self.current_video_title = title
         self.current_video_url = new_video_url
         self.current_video_id = new_video_id
 
-        # ✅ Get internal DB IDs
-        c.execute("SELECT id FROM videos WHERE youtube_id = ?", (self.current_video_id,))
-        video_result = c.fetchone()
-        c.execute("SELECT id FROM playlists WHERE id = ?", (self.current_playlist_id,))
-        playlist_result = c.fetchone()
+        # Enable relevant buttons
+        self.timestamp_btn.setEnabled(True)
+        self.save_btn.setEnabled(True)
+        self.screenshot_btn.setEnabled(True)
+        self.view_timestamps_btn.setEnabled(True)
+        self.view_screenshots_btn.setEnabled(True)
 
-        if not video_result or not playlist_result:
-            print("❌ [play_selected_video] Could not resolve video/playlist IDs.")  # DEBUG
-            return
+        # Load the video
+        self.video_player.load(QUrl(new_video_url))
 
-        video_db_id = video_result[0]
-        playlist_db_id = playlist_result[0]
-
-        # ✅ Get or create key_id
-        key_id = get_or_create_key_id(video_db_id, playlist_db_id)
-        print(f"🔁 [play_selected_video] Using key_id: {key_id}")  # DEBUG
-
-        # ✅ Load saved notes
-        try:
-            c.execute("SELECT id FROM videos WHERE youtube_id = ?", (self.current_video_id,))
-            video_result = c.fetchone()
-            c.execute("SELECT id FROM playlists WHERE id = ?", (self.current_playlist_id,))
-            playlist_result = c.fetchone()
-
-            if not video_result or not playlist_result:
-                print("❌ [callback] Could not fetch video_id or playlist_id from DB")  # DEBUG
-                return
-
-            video_db_id = video_result[0]
-            playlist_db_id = playlist_result[0]
-            print(f"📦 video_db_id = {video_db_id}, playlist_db_id = {playlist_db_id}")
-
-
-            key_id = get_or_create_key_id(video_db_id, playlist_db_id)
-            print(f"🧠 key_id for this video = {key_id}")
-            c.execute("SELECT content_html FROM Complete_Notes WHERE key_id = ? ORDER BY last_updated DESC LIMIT 1", (key_id,))
-            if note_result:
-                print("📝 Note loaded from Complete_Notes")
-            else:
-                print("📭 No note found for this key_id")
-
-            note_result = c.fetchone()
-            if note_result:
-                html = note_result[0]
-                self.notes.setHtml(html)
-                print("📝 Loaded saved note for this video.")  # DEBUG
-            else:
-                self.notes.clear()
-        except Exception as e:
-            print("❌ Failed to load notes:", e)
-
-        # ✅ Load last playback position
-        c.execute("SELECT last_position_seconds FROM LastPlayback WHERE key_id = ?", (key_id,))
-        res = c.fetchone()
-        if res:
-            print(f"⏩ Found resume time: {res[0]} seconds")
-        else:
-            print("🔰 No resume time found.")
-
-        start_seconds = res[0] if res else 0
-
-        # ✅ Load video with resume timestamp
-        video_base_url = f"https://www.youtube.com/watch?v={self.current_video_id}"
-        video_url_with_time = f"{video_base_url}?t={start_seconds}" if start_seconds > 0 else video_base_url
-        self.video_player.load(QUrl(video_url_with_time))
-        print(f"🎥 Final YouTube URL: {video_url_with_time}")
-
-
-        # ✅ Reconnect loadFinished signal
+        # Connect load finished handler
         if self.resume_prompt_connected:
             try:
-                self.video_player.page().loadFinished.disconnect(self.check_saved_video_position)
+                self.video_player.page().loadFinished.disconnect()
             except Exception:
                 pass
-
-        self.video_player.page().loadFinished.connect(self.check_saved_video_position)
+                
+        self.video_player.page().loadFinished.connect(
+            lambda ok: self.check_saved_video_position(ok),
+            Qt.QueuedConnection
+        )
         self.resume_prompt_connected = True
-
 
     def save_current_video_timestamp(self):
         if not all([self.current_video_id, self.current_playlist_id]):
@@ -895,11 +955,20 @@ class YouTubeNotesApp(QWidget):
         self.video_player.page().runJavaScript(js, callback)
 
     def get_video_db_id(self, youtube_id):
-        c.execute("SELECT id FROM videos WHERE youtube_id = ?", (youtube_id,))
-        result = c.fetchone()
-        return result[0] if result else None
-    
-
+        try:
+            c.execute("SELECT id FROM videos WHERE youtube_id = ?", (youtube_id,))
+            result = c.fetchone()
+            if result:
+                return result[0]
+            
+            # Insert if not exists
+            c.execute("INSERT INTO videos (youtube_id) VALUES (?)", (youtube_id,))
+            conn.commit()
+            return c.lastrowid
+        except Exception as e:
+            print(f"Error getting video DB ID: {e}")
+            return None
+        
     def show_timestamps_for_current_video(self):
         print("🛠️ Timestamps button clicked")
         if not self.current_video_id or not self.current_playlist_id:
@@ -1202,6 +1271,22 @@ class YouTubeNotesApp(QWidget):
             try:
                 if seconds is None:
                     raise ValueError("Couldn't fetch video time")
+                
+                  # ====== ADD THE SAFE PATH HANDLING CODE HERE ======
+                # 🧼 Prepare clean names
+                safe_title = re.sub(r'[\\/*?:"<>|]', "_", self.current_video_title)
+                safe_playlist = re.sub(r'[\\/*?:"<>|]', "_", f"Playlist_{self.current_playlist_id}")
+                
+                folder = os.path.join("ScreenShot", safe_playlist)
+                os.makedirs(folder, exist_ok=True)
+                
+                filename = f"{safe_title}_{seconds}.png"
+                filepath = os.path.join(folder, filename)
+                # ====== END OF SAFE PATH HANDLING CODE ======
+
+                # 📸 Take screenshot of video player only
+                pixmap = self.video_player.grab()
+                pixmap.save(filepath)
 
                 # 🧼 Prepare clean names
                 c.execute("""
@@ -1396,6 +1481,88 @@ class YouTubeNotesApp(QWidget):
         self.video_player.page().runJavaScript(js)
         print("⏹️ Full video loop DISABLED")
 
+    def simulate_video_click(self, title):
+        for i in range(self.video_list.count()):
+            item = self.video_list.item(i)
+            widget = self.video_list.itemWidget(item)
+            label = widget.findChild(QLabel)  # The QLabel holding the title
+            if label and label.text().strip() == title.strip():
+                self.play_selected_video(item)
+                break
+
+    def play_video_from_data(self, youtube_id, video_url, title):
+        print(f"🎬 Switching to video: {title}")
+        
+        # Save previous timestamp
+        if self.current_video_id and self.current_video_id != youtube_id:
+            print("🔃 Saving previous timestamp...")
+            self.save_current_video_timestamp()
+
+        self.current_video_id = youtube_id
+        self.current_video_url = video_url
+        self.current_video_title = title
+
+        if not self.current_playlist_id:
+            print("❌ No playlist selected.")
+            return
+
+        # 🔍 Make sure video is in DB
+        c.execute("SELECT id FROM videos WHERE youtube_id = ?", (youtube_id,))
+        video_result = c.fetchone()
+        if not video_result:
+            print("⚠️ Inserting new video into DB")
+            c.execute("INSERT INTO videos (youtube_id, video_url, title) VALUES (?, ?, ?)",
+                    (youtube_id, video_url, title))
+            conn.commit()
+            c.execute("SELECT id FROM videos WHERE youtube_id = ?", (youtube_id,))
+            video_result = c.fetchone()
+
+        c.execute("SELECT id FROM playlists WHERE id = ?", (self.current_playlist_id,))
+        playlist_result = c.fetchone()
+        if not video_result or not playlist_result:
+            print("❌ Could not resolve video/playlist from DB")
+            return
+
+        video_db_id = video_result[0]
+        playlist_db_id = playlist_result[0]
+        key_id = get_or_create_key_id(video_db_id, playlist_db_id)
+        print(f"🔑 key_id = {key_id}")
+
+        # Load notes
+        try:
+            c.execute("""
+                SELECT content_html FROM Complete_Notes 
+                WHERE key_id = ? ORDER BY last_updated DESC LIMIT 1
+            """, (key_id,))
+            note_result = c.fetchone()
+            if note_result:
+                self.notes.setHtml(note_result[0])
+            else:
+                self.notes.clear()
+        except Exception as e:
+            print("❌ Failed loading notes:", e)
+
+        # Load resume time
+        c.execute("SELECT last_position_seconds FROM LastPlayback WHERE key_id = ?", (key_id,))
+        res = c.fetchone()
+        start_seconds = res[0] if res else 0
+
+        final_url = f"https://www.youtube.com/watch?v={youtube_id}"
+        if start_seconds > 0:
+            final_url += f"&t={start_seconds}"
+        self.video_player.load(QUrl(final_url))
+        print(f"🎥 Final URL = {final_url}")
+
+        # Reconnect resume checker
+        if self.resume_prompt_connected:
+            try:
+                self.video_player.page().loadFinished.disconnect(self.check_saved_video_position)
+            except Exception:
+                pass
+        self.video_player.page().loadFinished.connect(self.check_saved_video_position)
+        self.resume_prompt_connected = True
+
+
 def get_or_create_key_id(video_id, playlist_id):
     """Returns the key_id if exists, else creates and returns a new one"""
     try:
@@ -1422,6 +1589,9 @@ def cleanup_temp_files():
             os.remove(f)
         except:
             pass
+
+
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

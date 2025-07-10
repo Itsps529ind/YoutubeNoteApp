@@ -1,29 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="playlist.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="2211"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><table title="Complete_Notes" custom_title="0" dock_id="1" table="4,14:mainComplete_Notes"/><dock_state state="000000ff00000000fd00000001000000020000000000000000fc0100000001fb000000160064006f0063006b00420072006f00770073006500310100000000ffffffff0000011300ffffff000000000000000000000004000000040000000800000008fc00000000"/><default_encoding codec=""/><browse_table_settings/></tab_browse><tab_sql><sql name="SQL 1*">CREATE TABLE IF NOT EXISTS VideoKeys (
-    id TEXT PRIMARY KEY,
-    video_id INTEGER,
-    playlist_id INTEGER,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (video_id, playlist_id),
-    FOREIGN KEY (video_id) REFERENCES videos(id),
-    FOREIGN KEY (playlist_id) REFERENCES playlists(id)
-);
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="playlist.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="2211"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><table title="Complete_Notes" custom_title="0" dock_id="1" table="4,14:mainComplete_Notes"/><dock_state state="000000ff00000000fd00000001000000020000000000000000fc0100000001fb000000160064006f0063006b00420072006f00770073006500310100000000ffffffff0000011300ffffff000000000000000000000004000000040000000800000008fc00000000"/><default_encoding codec=""/><browse_table_settings/></tab_browse><tab_sql><sql name="SQL 1*">DROP TABLE IF EXISTS Complete_Notes;
+
 CREATE TABLE IF NOT EXISTS Complete_Notes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    key_id TEXT,
-    timestamp_seconds INTEGER,
+    key_id INTEGER NOT NULL,
     content_html TEXT,
-    formatting_json TEXT,
-    resource_paths TEXT,
-    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (key_id) REFERENCES VideoKeys(id),
-    UNIQUE (key_id, timestamp_seconds)
-);
-CREATE TABLE IF NOT EXISTS LastPlayback (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    key_id TEXT,
-    last_position_seconds INTEGER,
-    last_position_str TEXT,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (key_id) REFERENCES VideoKeys(id),
-    UNIQUE (key_id)
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );</sql><current_tab id="0"/></tab_sql></sqlb_project>
